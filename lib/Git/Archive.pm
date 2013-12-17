@@ -65,7 +65,7 @@ sub _get_repo {
     my ($self, $args) = @_;
     $args->{git_dir} ||= './';
     my $repo;
-    eval { $repo = Git::Repository->new( git_dir => $args->{git_dir} ); };
+    eval { $repo = Git::Repository->new( work_tree => $args->{git_dir} ); };
     unless ($@) {
         return $repo;
         }
