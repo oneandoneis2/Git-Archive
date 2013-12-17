@@ -36,9 +36,10 @@ sub commit {
         }
 
     # Looks like we're good to go. Let's commit!
-    my $files = $self->_commit( $args );
+    my $files = $self->_commit( $args, $repo );
     # We've got a new commit. Do we need to worry about a remote?
-    my $do_remote = $self->_handle_remote( $args, $repo ) if $args->{use_remote};
+    my $do_remote;
+    $do_remote = $self->_handle_remote( $args, $repo, $files ) if $args->{use_remote};
     return $error->( $args, $args->{error} ) if $do_remote;;
 
     # Looks like we made it! Run the success sub if appropriate
@@ -63,6 +64,7 @@ sub _filenames {
 sub _get_repo {
     my ($self, $args) = @_;
     $args->{git_dir} ||= './';
+    my $repo;
     eval { $repo = Git::Repository->new( git_dir => $args->{git_dir} ); };
     unless ($@) {
         return $repo;
@@ -72,7 +74,7 @@ sub _get_repo {
     }
 
 sub _commit {
-    my ($self, $args) = @_;
+    my ($self, $args, $repo) = @_;
 
     my $files; # To record what files we intend to commit
 
@@ -121,7 +123,8 @@ sub _commit {
     }
 
 sub _handle_remote {
-    my ($self, $args, $repo) = @_;
+    my ($self, $args, $repo, $files) = @_;
+    my $remote = $args->{use_remote};
     $repo->run( fetch => $remote );
 
     # Find out if our committed files have been modified on the remote
