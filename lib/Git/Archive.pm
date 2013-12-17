@@ -14,28 +14,25 @@ sub commit {
 
     # Check for mandatory args
     ## First, make sure we have an error sub defined
-    my $error = $args{error} // sub { my $error = shift; print STDERR $error };
+    my $error = $args{error} // sub { my $error = shift; print STDERR $error; return 1; };
 
     ## Now throw errors if necessary
     unless ( $args{msg} ) {
-        $error->('No commit message supplied');
-        return 1;
+        return $error->('No commit message supplied');
         }
     unless ( $args{files} || $args{all_tracked} || $args{all_dirty} ) {
-        $error->('No files specified to commit');
-        return 2;
+        return $error->('No files specified to commit');
         }
 
     # Seems all is well. Check if the environment is sane
     ## Is the current or passed-in directory a git repo?
     my $repo;
     eval { $repo = Git::Repository->new( git_dir => $args{git_dir} ); };
-    if ($@) { $error->($@); return 3; }
+    if ($@) { return $error->($@) }
 
     ## Are there files already staged?
     if ( $repo->run( qw/diff --cached --name-only/ ) ) {
-        $error->('Repo already has staged files');
-        return 4
+        return $error->('Repo already has staged files');
         }
 
     # Looks like we're good to go. Stage the files
@@ -51,20 +48,29 @@ sub commit {
             unless ( @staged == @files ) {
                 # Numerical equality is Good Enough for now
                 $repo->run( reset => 'HEAD' ); # Unstage the files, it's all gone wrong!
-                $error->('Some files not staged when "check_all_staged" specified');
-                return 5;
+                return $error->('Some files not staged when "check_all_staged" specified');
                 }
             }
+        # Files staged and ready to go. Commit time
+        $repo->run( commit => '-m "' . $args{msg} . '"' );
         }
     elsif ( $args{all_tracked} ) {
         ## We want to commit any modified tracked files
+        my @status = $repo->run( status => '-s' );
+        unless ( grep { $_ !~ m/^\?\?/ } @status ) {
+            return $error->('No modified files to commit');
+            }
+        $repo->run( commit => '-a -m "' . $args{msg} . '"' );
         }
     elsif ( $args{all_dirty} ) {
         ## We want to commit all files in their current state
+        my @status = $repo->run( status => '-s' );
+        unless ( @status ) {
+            return $error->('No modified files to commit');
+            }
+        eval { $repo->run( add => $files ); };
+        $repo->run( commit => '-m "' . $args{msg} . '"' );
         }
-
-    # Files staged and ready to go. Commit time
-    $repo->run( commit => '-m "' . $args{msg} . '"' );
 
     # We've got a new commit. Do we need to worry about a remote?
     if ( my $remote = $args{use_remote} ) {
@@ -79,8 +85,7 @@ sub commit {
         # the files we just committed!
         my %remotes = map { $_ => 1 } @remote_files;
         if ( grep { $remotes{$_} } @{ split ' ', $files } ) {
-            $error->('Commit cannot be pushed due to possible conflicts');
-            return 6;
+            return $error->('Commit cannot be pushed due to possible conflicts');
             }
 
         # Looks like we should be good to go. Push time?
@@ -93,8 +98,7 @@ sub commit {
 
         # Should be ok, but let's make sure
         if ( $push =~ m#\[rejected\]# ) {
-            $error->( 'Could not push commit, git returned: ' . $push );
-            return 7;
+            return $error->( 'Could not push commit, git returned: ' . $push );
             }
         }
 
