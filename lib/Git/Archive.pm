@@ -37,6 +37,9 @@ sub commit {
 
     # Looks like we're good to go. Let's commit!
     my $files = $self->_commit( $args, $repo );
+    unless ($files) {
+        return $error->( $args, $args->{error} );
+        }
     # We've got a new commit. Do we need to worry about a remote?
     my $do_remote;
     $do_remote = $self->_handle_remote( $args, $repo, $files ) if $args->{use_remote};
@@ -89,7 +92,7 @@ sub _commit {
     if ( $args->{files} ) {
         ## We have a list of specified files to commit
         $files = $self->_filenames( $args );
-        eval { $repo->run( add => $files ); };
+        eval { $repo->run( 'add', split ' ', $files ); };
         ## Do we need to make sure all the files had changes to stage?
         if ( $args->{check_all_staged} ) {
             my @staged = $repo->run( qw/diff --cached --name-only/ );
@@ -113,7 +116,7 @@ sub _commit {
             return;
             }
         $files = join ' ', map { $_ =~ s/^\s*\S+\s+(\S+)/$1/ } @staged;
-        $repo->run( commit => '-a -m "' . $args->{msg} . '"' );
+        $repo->run( commit => '-a', '-m "' . $args->{msg} . '"' );
         }
     elsif ( $args->{all_dirty} ) {
         ## We want to commit all files in their current state
@@ -122,7 +125,7 @@ sub _commit {
             $args->{error} = 'No modified files to commit';
             return;
             }
-        $files = join ' ', map { $_ =~ s/^\s*\S+\s+(\S+)/$1/ } @status;
+        $files = join ' ', map { $_ =~ s/^\s*\S+\s+(\S+)/$1/; $_ } @status;
         eval { $repo->run( add => $files ); };
         $repo->run( commit => '-m "' . $args->{msg} . '"' );
         }
@@ -132,35 +135,31 @@ sub _commit {
 
 sub _handle_remote {
     my ($self, $args, $repo, $files) = @_;
+    # We have a commit. Hopefully, the remote repo has nothing we don't.
+    # But since it may well have, we need to:
+    # Pull, and hope it doesn't fail
+    # Then push, and hope it doesn't fail
     my $remote = $args->{use_remote};
-    $repo->run( fetch => $remote );
-
-    # Find out if our committed files have been modified on the remote
-    my $branch = $repo->run( 'rev-parse --abbrev-ref HEAD' );
-    my @remote_files = $repo->run( qq#diff $remote/$branch HEAD^ --name-only# );
-    # ^ checks the current head of our branch against the commit BEFORE
-    # the one we just added - we know that the current HEAD has changed
-    # the files we just committed!
-    my %remotes = map { $_ => 1 } @remote_files;
-    if ( grep { $remotes{$_} } @{ split ' ', $files } ) {
-        $args->{error} = 'Commit cannot be pushed due to possible conflicts';
+    my $pull = $repo->run( pull => $remote );
+    if ( $pull =~ /Automatic merge failed/ ) {
+        # Damn, the pull didn't work.
+        # Quick, pretend it never happened!
+        $repo->run( merge => '--abort' );
+        # Actually, we should probably 'fess up
+        $args->{error} = 'Unable to push to remote: Cannot pull';
         return 1;
         }
-
-    # Looks like we should be good to go. Push time?
-    # No, we want to 'pull' first, of course. Except ideally, without going back
-    # to the remote, so let's fake it with the fetch we just did
-    $remote->run( "merge FETCH_HEAD" );
-    # Now that we're effectively 'pull'ed up to date, push
-    # Hopefully nobody's had time to push anything else in the tiny window
-    my $push = $remote->run( "push $remote" );
-
-    # Should be ok, but let's make sure
-    if ( $push =~ m#\[rejected\]# ) {
-        $args->{error} = 'Could not push commit, git returned: ' . $push;
+    # Ok, we managed a pull. Hopefully we can now push
+    my $push = $repo->run( push => $remote );
+    if ( $push =~ /\[rejected\]/ ) {
+        # We failed. Maybe somebody managed to push?
+        # (in the tiny amount of time they had to work with)
+        # Possibly we should try to push multiple times, but CBA -
+        # "fail once, shout for help" seems far saner.
+        $args->{error} = 'Unable to push to remote: Rejected';
         return 1;
         }
-    return 0;
+    return;
     }
 
 1;
