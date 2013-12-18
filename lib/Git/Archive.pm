@@ -64,6 +64,14 @@ sub _filenames {
 sub _get_repo {
     my ($self, $args) = @_;
     $args->{git_dir} ||= './';
+    unless (-e $args->{git_dir}) {
+        $args->{error} = "Unable to initialise git directory:\nNo such directory";
+        return;
+        }
+    unless (-e $args->{git_dir}.'/.git') {
+        $args->{error} = "Unable to initialise git directory:\nNo .git found";
+        return;
+        }
     my $repo;
     eval { $repo = Git::Repository->new( work_tree => $args->{git_dir} ); };
     unless ($@) {
