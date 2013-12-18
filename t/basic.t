@@ -6,7 +6,6 @@ use File::Path qw/remove_tree/;
 use Data::Dumper;
 
 my ($ld, $rd) = ('t/local', 't/remote');
-remove_tree($ld, $rd);
 # These should JFW and go without saying, or something went horribly wrong
 ok(`git --version` =~ 'git version', 'Git is installed');
 use_ok('Git::Repository');
@@ -199,3 +198,4 @@ sub basic_data {
     }
 
 done_testing;
+remove_tree($ld, $rd);
