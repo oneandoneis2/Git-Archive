@@ -179,8 +179,30 @@ Git::Archive - For automated git commits
 
 =head1 DESCRIPTION
 
-Git::Archive is designed to simplify the automated commit of files in a git repo,
-with optional pushing to a remote branch
+When you want to have code commit changes to a Git repo, you don't have the luxury of
+being lazy and simply doing:
+
+  git pull (fix conflicts)
+  git commit changes
+  git push (pull&push again if somebody else got there first)
+
+Many little things can go wrong:
+
+=over
+
+=item What if files are already staged when your code goes to commit?
+
+=item What if there are conflicts on pull?
+
+=item What if the world ends?
+
+=back
+
+This is a module that helps you not have to care about those questions!
+(Two out of three ain't bad)
+
+The goal is to allow you to simply call the commit method, and know that you'll get
+a useful error and safe recovery to a working state whatever goes wrong.
 
 =head2 Arguments:
 
@@ -195,12 +217,37 @@ Can be a string of space-separated files, or an arrayref of files
 
 =head3 error
 
-If you want to do more with errors than dump them to STDERR, supply a function to handle them
+Default behaviour for errors is to just dump them to STDERR.
+
+If you want something more exciting (like email!) supply a subref here.
+
+=head4 Args:
+
+=over
+
+=item $args
+
+Hashref, mostly the arguments you passed in when calling the commit method
+
+=item $error
+
+String containing the actual error message
+
+=back
 
 =head3 success
 
-If you want to execute some code upon successful commit (send an email, etc.) supply the
-function here
+If you want to execute some code upon successful commit supply the function here
+
+=head4 Args:
+
+=over
+
+=item $args
+
+Hashref, mostly the arguments you passed in when calling the commit method
+
+=back
 
 =head3 all_tracked
 
@@ -212,7 +259,8 @@ If you want to commit all changes in the directory, tracked or not, set this to 
 
 =head3 use_remote
 
-If you want to push to a remote, set this to the name of the remote (usually 'origin')
+If you want to push to a remote, set this to the name of the remote
+(You'll typically want this to be 'origin')
 
 =head3 check_all_staged
 
@@ -222,6 +270,9 @@ set this to be true: It will then throw an error if the file was unchanged/doesn
 =head3 git_dir
 
 If you want to use a directory other than the current one as your repo, specify it here
+
+Note: If your git-controlled dir is ./foo and you want to commit the file ./foo/bar/baz
+then ( git_dir => './foo', files => 'bar/baz' )
 
 =head1 AUTHOR
 
