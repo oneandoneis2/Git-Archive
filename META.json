@@ -1,5 +1,5 @@
 {
-   "abstract" : "Blah blah blah",
+   "abstract" : "For automated file archiving with Git",
    "author" : [
       "Dominic Humphries <dominic@oneandoneis2.com>"
    ],
@@ -24,9 +24,14 @@
       ]
    },
    "prereqs" : {
+      "build" : {
+         "requires" : {
+            "Module::Build" : "0.3601"
+         }
+      },
       "configure" : {
          "requires" : {
-            "Module::Build::Tiny" : "0.030"
+            "Module::Build" : "0.3601"
          }
       },
       "develop" : {
@@ -36,16 +41,31 @@
       },
       "runtime" : {
          "requires" : {
-            "perl" : "5.008005"
+            "Git::Repository" : "0",
+            "perl" : "v5.10.0",
+            "strict" : "0"
          }
       },
       "test" : {
          "requires" : {
+            "Data::Dumper" : "0",
+            "File::Path" : "0",
             "Test::More" : "0.88"
          }
       }
    },
    "release_status" : "stable",
+   "resources" : {
+      "bugtracker" : {
+         "web" : "https://github.com/oneandoneis2/Git-Archive/issues"
+      },
+      "homepage" : "https://github.com/oneandoneis2/Git-Archive",
+      "repository" : {
+         "type" : "git",
+         "url" : "https://github.com/oneandoneis2/Git-Archive.git",
+         "web" : "https://github.com/oneandoneis2/Git-Archive"
+      }
+   },
    "version" : "0.01"
 }
 
