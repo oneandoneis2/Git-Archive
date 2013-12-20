@@ -16,7 +16,7 @@ sub commit {
     my $error =  $args->{error}
               || sub {
                   my ($args, $error) = @_;
-                  print STDERR "[ERROR] $error";
+                  print STDERR "[ERROR] $error\n";
                   return 1;
                   };
 
