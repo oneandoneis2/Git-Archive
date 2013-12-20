@@ -2,7 +2,7 @@ package Git::Archive;
 
 use strict;
 use v5.10.0;
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use Git::Repository;
 
