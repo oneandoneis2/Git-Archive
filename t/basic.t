@@ -7,7 +7,7 @@ use Data::Dumper;
 
 my ($ld, $rd) = ('t/local', 't/remote');
 # These should JFW and go without saying, or something went horribly wrong
-ok(`git --version` =~ 'git version', 'Git is installed');
+like(`git --version`, qr/git version/, 'Git is installed');
 use_ok('Git::Repository');
 
 # Right. We need a repo with a remote, so we'll need to create a bare repo and clone it
@@ -198,4 +198,4 @@ sub basic_data {
     }
 
 done_testing;
-remove_tree($ld, $rd);
+remove_tree($ld, $rd,'t/nongit');

@@ -5,7 +5,6 @@ use v5.10.0;
 our $VERSION = '0.01';
 
 use Git::Repository;
-use Data::Dumper;
 
 sub commit {
     my $self = shift;
@@ -15,7 +14,11 @@ sub commit {
     # Check for mandatory args
     ## First, make sure we have an error sub defined
     my $error =  $args->{error}
-              // sub { my ($args, $error) = @_; print STDERR "[ERROR] $error"; return 1; };
+              || sub {
+                  my ($args, $error) = @_;
+                  print STDERR "[ERROR] $error";
+                  return 1;
+                  };
 
     ## Now throw errors if necessary
     unless ( $args->{msg} ) {
@@ -170,7 +173,7 @@ __END__
 
 =head1 NAME
 
-Git::Archive - For automated git commits
+Git::Archive - For automated file archiving with Git
 
 =head1 SYNOPSIS
 
@@ -179,18 +182,18 @@ Git::Archive - For automated git commits
 
 =head1 DESCRIPTION
 
-When you want to have code commit changes to a Git repo, you don't have the luxury of
-being lazy and simply doing:
+When you want to have code maintain a file archive by committing changes to a Git repo,
+you don't have the luxury of being lazy and simply telling the code to do:
 
-  git pull (fix conflicts)
+  git pull
   git commit changes
-  git push (pull&push again if somebody else got there first)
+  git push
 
 Many little things can go wrong:
 
 =over
 
-=item What if files are already staged when your code goes to commit?
+=item What if files are already staged when your code goes to commit its changes?
 
 =item What if there are conflicts on pull?
 
@@ -198,11 +201,11 @@ Many little things can go wrong:
 
 =back
 
-This is a module that helps you not have to care about those questions!
+This is a module that helps you not have to care about such questions!
 (Two out of three ain't bad)
 
 The goal is to allow you to simply call the commit method, and know that you'll get
-a useful error and safe recovery to a working state whatever goes wrong.
+a useful error and safe recovery to a working state, whatever goes wrong.
 
 =head2 Arguments:
 
