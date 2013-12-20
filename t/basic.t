@@ -1,5 +1,4 @@
 use strict;
-use lib 'lib';
 use Test::More;
 use Git::Archive;
 use File::Path qw/remove_tree/;
