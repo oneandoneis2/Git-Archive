@@ -1,6 +1,7 @@
 Revision history for Git-Archive
 
 {{$NEXT}}
+        - Fix adding multiple files when calling all_dirty
 
 0.01  2013-12-20 10:19:05 GMT
         - Initial release

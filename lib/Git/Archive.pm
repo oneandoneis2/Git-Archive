@@ -129,7 +129,7 @@ sub _commit {
             return;
             }
         $files = join ' ', map { $_ =~ s/^\s*\S+\s+(\S+)/$1/; $_ } @status;
-        eval { $repo->run( add => $files ); };
+        eval { $repo->run( 'add', split ' ', $files ); };
         $repo->run( commit => '-m "' . $args->{msg} . '"' );
         }
 
