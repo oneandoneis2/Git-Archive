@@ -17,13 +17,14 @@ my %module_build_args = (
     "Dominic Humphries <dominic\@oneandoneis2.com>"
   ],
   "dist_name" => "Git-Archive",
-  "dist_version" => "0.03",
+  "dist_version" => "0.04",
   "license" => "perl",
   "module_name" => "Git::Archive",
   "recommends" => {},
   "recursive_test_files" => 1,
   "requires" => {
     "Git::Repository" => 0,
+    "IPC::Cmd" => 0,
     "perl" => "v5.10.0",
     "strict" => 0
   },
