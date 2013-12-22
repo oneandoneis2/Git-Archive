@@ -3,6 +3,7 @@ package Git::Archive;
 use strict;
 use v5.10.0;
 our $VERSION = '0.03';
+use IPC::Cmd qw/can_run/;
 
 use Git::Repository;
 
@@ -26,6 +27,9 @@ sub commit {
         }
     unless ( $args->{files} || $args->{all_tracked} || $args->{all_dirty} ) {
         return $error->( $args,'No files specified to commit');
+        }
+    unless ( can_run( 'git' ) ) {
+        return $error->( $args,'Git does not appear to be installed');
         }
 
     # Seems all is well with args. Check if the environment is sane

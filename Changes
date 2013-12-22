@@ -1,6 +1,7 @@
 Revision history for Git-Archive
 
 {{$NEXT}}
+        - Fix possibility of git not being installed
 
 0.03  2013-12-20 10:49:07 GMT
         - Fix missing newline in error msg

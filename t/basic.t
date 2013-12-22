@@ -3,6 +3,13 @@ use Test::More;
 use Git::Archive;
 use File::Path qw/remove_tree/;
 use Data::Dumper;
+use IPC::Cmd qw[can_run];
+
+ unless ( can_run('git') ) {
+     ok(1,'No git, no dice');
+     done_testing;
+     exit 0;
+     }
 
 my ($ld, $rd) = ('t/local', 't/remote');
 # These should JFW and go without saying, or something went horribly wrong
