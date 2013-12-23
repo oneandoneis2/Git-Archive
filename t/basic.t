@@ -31,7 +31,7 @@ my $repo = Git::Repository->new( work_tree => $ld );
     close $foo;
     $repo->run( add => 'foo' );
     $repo->run( commit => '-m "First post!"' );
-    $repo->run( push => '--set-upstream');
+    $repo->run( push => '--set-upstream', 'origin', 'master');
     my @logs = $repo->run( log => '--pretty=oneline');
     is(scalar @logs, 1, 'Initial commit successful');
     my @o_logs = $repo->run( log => '--pretty=oneline', 'origin/master');
