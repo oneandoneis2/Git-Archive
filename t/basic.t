@@ -1,11 +1,11 @@
 use strict;
 use Test::More;
 use Git::Archive;
-use File::Path qw/remove_tree/;
+use File::Path qw/remove_tree make_path/;
 use Data::Dumper;
 use IPC::Cmd qw[can_run];
 
- unless ( can_run('git') ) {
+unless ( can_run('git') ) {
      ok(1,'No git, no dice');
      done_testing;
      exit 0;
@@ -140,29 +140,6 @@ sub basic_data {
     is(scalar @logs, 6, 'Commit successful');
     }
 
-{   # Fail to commit when check_all_staged specified and not all files updated
-    update_foo();
-    my %data = basic_data();
-    $data{git_dir} = $ld;
-    $data{check_all_staged} = 1;
-    $data{files} = 'foo bar';
-    like(Git::Archive->commit(\%data), qr/Some files not staged/, 'Did not commit files');
-    $repo->run( checkout => 'foo' );
-    }
-
-{   # Commit files in string
-    update_foo();
-    open(my $bar, '>>', "$ld/bar");
-    print $bar "A line\n";
-    close $bar;
-    my %data = basic_data();
-    $data{git_dir} = $ld;
-    $data{files} = 'foo bar';
-    is(Git::Archive->commit(\%data), 0, 'Committed file');
-    my @logs = $repo->run( log => '--pretty=oneline');
-    is(scalar @logs, 7, 'Commit successful');
-    }
-
 {   # Commit files in arrayref
     update_foo();
     open(my $bar, '>>', "$ld/bar");
@@ -173,7 +150,31 @@ sub basic_data {
     $data{files} = [qw/foo bar/];
     is(Git::Archive->commit(\%data), 0, 'Committed file');
     my @logs = $repo->run( log => '--pretty=oneline');
+    is(scalar @logs, 7, 'Commit successful');
+    }
+
+{   # Commit file with spaces in name
+    update_foo();
+    open(my $space, '>>', "$ld/spaced\ file");
+    print $space "A line\n";
+    close $space;
+    my %data = basic_data();
+    $data{git_dir} = $ld;
+    $data{files} = ['spaced file', 'foo'];
+    $data{check_all_staged} = 1;
+    is(Git::Archive->commit(\%data), 0, 'Committed spaced file');
+    my @logs = $repo->run( log => '--pretty=oneline');
     is(scalar @logs, 8, 'Commit successful');
+    }
+
+{   # Fail to commit when check_all_staged specified and not all files updated
+    update_foo();
+    my %data = basic_data();
+    $data{git_dir} = $ld;
+    $data{check_all_staged} = 1;
+    $data{files} = [qw/foo bar/];
+    like(Git::Archive->commit(\%data), qr/Some files not staged/, 'Did not commit files');
+    $repo->run( checkout => 'foo' );
     }
 
 {   # Commit & push
@@ -187,6 +188,20 @@ sub basic_data {
     my @o_logs = $repo->run( log => '--pretty=oneline', 'origin/master');
     is(@o_logs, 9, 'Push successful');
     }
+
+{   # Commit file in subdir
+    update_foo();
+    make_path( "$ld/dir" );
+    open(my $bar, '>>', "$ld/dir/foo");
+    print $bar "A line\n";
+    close $bar;
+    my %data = basic_data();
+    $data{git_dir} = $ld;
+    $data{msg} = "blah";
+    $data{files} = [qw#foo dir/foo#];
+    is(Git::Archive->commit(\%data), 0, 'Committed file');
+    my @logs = $repo->run( log => '--pretty=oneline');
+    is(scalar @logs, 10, 'Commit successful');    }
 
 {   # Commit & fail to pull
     update_foo('one');
@@ -203,5 +218,5 @@ sub basic_data {
     like($st, qr/1 and 1 different.*working directory clean/s, 'Correctly reverted');
     }
 
-done_testing;
 remove_tree($ld, $rd,'t/nongit');
+done_testing;
