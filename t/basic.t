@@ -217,6 +217,21 @@ sub basic_data {
     is(scalar @logs, 11, 'Commit successful');
     }
 
+{   # Commit file when only subdir supplied
+    open(my $bar, '>>', "$ld/dir/foo");
+    print $bar "A line\n";
+    close $bar;
+    my %data = basic_data();
+    $data{git_dir} = $ld;
+    $data{files} = 'dir';
+    is(Git::Archive->commit(\%data), 0, 'Committed file');
+    my @logs = $repo->run( log => '--pretty=oneline');
+    is(scalar @logs, 12, 'Commit successful');
+    my $stat = $repo->run( show => '--stat');
+    like($stat, qr#dir/foo#, 'Committed file in subdir');
+    diag $stat;
+    }
+
 {   # Commit & fail to pull
     update_foo('one');
     $repo->run( commit => 'foo', '-m', 'one' );
