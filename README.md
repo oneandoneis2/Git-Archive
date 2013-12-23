@@ -37,8 +37,9 @@ Commit message. This one is mandatory.
 ### files
 
 List of filenames to commit. Necessary unless you specify all\_tracked or all\_dirty.
-Can be a string if only one filename is to be committed, otherwise should be
-an arrayref of filename strings.
+Can be either a string of space-separated filenames, or an arrayref of filename strings.
+If any of the filenames will contain a space, you must use the arrayref option.
+Otherwise, use whichever you prefer.
 
 ### error
 
@@ -46,7 +47,7 @@ Default behaviour for errors is to just dump them to STDERR.
 
 If you want something more exciting (like email!) supply a subref here.
 
-#### Args:
+#### Error sub arguments:
 
 - $args
 
@@ -60,7 +61,7 @@ If you want something more exciting (like email!) supply a subref here.
 
 If you want to execute some code upon successful commit supply the function here
 
-#### Args:
+#### Success sub arguments:
 
 - $args
 
