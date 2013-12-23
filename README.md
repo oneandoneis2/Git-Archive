@@ -37,7 +37,8 @@ Commit message. This one is mandatory.
 ### files
 
 List of filenames to commit. Necessary unless you specify all\_tracked or all\_dirty.
-Can be a string of space-separated files, or an arrayref of files
+Can be a string if only one filename is to be committed, otherwise should be
+an arrayref of filename strings.
 
 ### error
 
