@@ -1,6 +1,7 @@
 Revision history for Git-Archive
 
 {{$NEXT}}
+        - Accept multiple filenames in a single string, space-separated, after all
 
 0.06  2013-12-23 11:22:15 GMT
         - Handle filenames with spaces in

@@ -12,6 +12,7 @@ unless ( can_run('git') ) {
      }
 
 my ($ld, $rd) = ('t/local', 't/remote');
+remove_tree($ld, $rd,'t/nongit');
 # These should JFW and go without saying, or something went horribly wrong
 like(`git --version`, qr/git version/, 'Git is installed');
 use_ok('Git::Repository');
@@ -197,11 +198,24 @@ sub basic_data {
     close $bar;
     my %data = basic_data();
     $data{git_dir} = $ld;
-    $data{msg} = "blah";
     $data{files} = [qw#foo dir/foo#];
     is(Git::Archive->commit(\%data), 0, 'Committed file');
     my @logs = $repo->run( log => '--pretty=oneline');
-    is(scalar @logs, 10, 'Commit successful');    }
+    is(scalar @logs, 10, 'Commit successful');
+    }
+
+{   # Commit files in string
+    update_foo();
+    open(my $bar, '>>', "$ld/bar");
+    print $bar "A line\n";
+    close $bar;
+    my %data = basic_data();
+    $data{git_dir} = $ld;
+    $data{files} = 'foo bar';
+    is(Git::Archive->commit(\%data), 0, 'Committed file');
+    my @logs = $repo->run( log => '--pretty=oneline');
+    is(scalar @logs, 11, 'Commit successful');
+    }
 
 {   # Commit & fail to pull
     update_foo('one');

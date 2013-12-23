@@ -62,7 +62,9 @@ sub _filenames {
     my ( $self, $args ) = @_;
 
     unless ( ref $args->{files} eq 'ARRAY' ) {
-        return [$args->{files}];
+        my $files = $args->{files};
+        $files =~ s/\s+/ /;
+        return [ split ' ', $files ];
         }
     return $args->{files};
     }
@@ -215,8 +217,9 @@ Commit message. This one is mandatory.
 =head3 files
 
 List of filenames to commit. Necessary unless you specify all_tracked or all_dirty.
-Can be a string if only one filename is to be committed, otherwise should be
-an arrayref of filename strings.
+Can be either a string of space-separated filenames, or an arrayref of filename strings.
+If any of the filenames will contain a space, you must use the arrayref option.
+Otherwise, use whichever you prefer.
 
 =head3 error
 
@@ -224,7 +227,7 @@ Default behaviour for errors is to just dump them to STDERR.
 
 If you want something more exciting (like email!) supply a subref here.
 
-=head4 Args:
+=head4 Error sub arguments:
 
 =over
 
@@ -242,7 +245,7 @@ String containing the actual error message
 
 If you want to execute some code upon successful commit supply the function here
 
-=head4 Args:
+=head4 Success sub arguments:
 
 =over
 
