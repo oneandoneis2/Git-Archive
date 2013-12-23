@@ -229,7 +229,6 @@ sub basic_data {
     is(scalar @logs, 12, 'Commit successful');
     my $stat = $repo->run( show => '--stat');
     like($stat, qr#dir/foo#, 'Committed file in subdir');
-    diag $stat;
     }
 
 {   # Commit & fail to pull
