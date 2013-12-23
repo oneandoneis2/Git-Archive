@@ -49,7 +49,7 @@ sub commit {
         }
     # We've got a new commit. Do we need to worry about a remote?
     my $do_remote;
-    $do_remote = $self->_handle_remote( $args, $repo, $files ) if $args->{use_remote};
+    $do_remote = $self->_handle_remote( $args, $repo ) if $args->{use_remote};
     return $error->( $args, $args->{error} ) if $do_remote;;
 
     # Looks like we made it! Run the success sub if appropriate
@@ -141,7 +141,7 @@ sub _commit {
     }
 
 sub _handle_remote {
-    my ($self, $args, $repo, $files) = @_;
+    my ($self, $args, $repo) = @_;
     # We have a commit. Hopefully, the remote repo has nothing we don't.
     # But since it may well have, we need to:
     # Pull, and hope it doesn't fail
