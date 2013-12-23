@@ -43,8 +43,8 @@ sub commit {
         }
 
     # Looks like we're good to go. Let's commit!
-    my $files = $self->_commit( $args, $repo );
-    unless ($files) {
+    my $files = $self->_commit( $args, $repo ) || [];
+    unless ( @{$files} ) {
         return $error->( $args, $args->{error} );
         }
     # We've got a new commit. Do we need to worry about a remote?
@@ -61,14 +61,10 @@ sub commit {
 sub _filenames {
     my ( $self, $args ) = @_;
 
-    if ( ref $args->{files} eq 'ARRAY' ) {
-        my $files = join ' ', @{ $args->{files} };
-        $files =~ s/\s+/ /;
-        return $files;
+    unless ( ref $args->{files} eq 'ARRAY' ) {
+        return [$args->{files}];
         }
-    else {
-        return $args->{files};
-        }
+    return $args->{files};
     }
 
 sub _get_repo {
@@ -99,12 +95,11 @@ sub _commit {
     if ( $args->{files} ) {
         ## We have a list of specified files to commit
         $files = $self->_filenames( $args );
-        eval { $repo->run( 'add', split ' ', $files ); };
+        eval { $repo->run( 'add', @{$files} ); };
         ## Do we need to make sure all the files had changes to stage?
         if ( $args->{check_all_staged} ) {
             my @staged = $repo->run( qw/diff --cached --name-only/ );
-            my @files = split ' ', $files;
-            unless ( @staged == @files ) {
+            unless ( @staged == @{$files} ) {
                 # Numerical equality is Good Enough for now
                 $repo->run( reset => 'HEAD' ); # Unstage the files, it's all gone wrong!
                 $args->{error} = 'Some files not staged when "check_all_staged" specified';
@@ -122,7 +117,7 @@ sub _commit {
             $args->{error} = 'No modified files to commit';
             return;
             }
-        $files = join ' ', map { $_ =~ s/^\s*\S+\s+(\S+)/$1/ } @staged;
+        $files = [map { $_ =~ s/^\s*\S+\s+(\S+)/$1/ } @staged];
         $repo->run( commit => '-a', '-m "' . $args->{msg} . '"' );
         }
     elsif ( $args->{all_dirty} ) {
@@ -132,8 +127,8 @@ sub _commit {
             $args->{error} = 'No modified files to commit';
             return;
             }
-        $files = join ' ', map { $_ =~ s/^\s*\S+\s+(\S+)/$1/; $_ } @status;
-        eval { $repo->run( 'add', split ' ', $files ); };
+        $files = [map { $_ =~ s/^\s*\S+\s+(\S+)/$1/; $_ } @status];
+        eval { $repo->run( 'add', @{$files} ); };
         $repo->run( commit => '-m "' . $args->{msg} . '"' );
         }
 
@@ -220,7 +215,8 @@ Commit message. This one is mandatory.
 =head3 files
 
 List of filenames to commit. Necessary unless you specify all_tracked or all_dirty.
-Can be a string of space-separated files, or an arrayref of files
+Can be a string if only one filename is to be committed, otherwise should be
+an arrayref of filename strings.
 
 =head3 error
 
