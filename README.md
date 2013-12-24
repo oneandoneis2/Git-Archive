@@ -92,6 +92,10 @@ If you want to use a directory other than the current one as your repo, specify 
 Note: If your git-controlled dir is ./foo and you want to commit the file ./foo/bar/baz
 then ( git\_dir => './foo', files => 'bar/baz' )
 
+### sudo
+
+If you want to call git as a different user via sudo, specify that user here
+
 # AUTHOR
 
 Dominic Humphries <dominic@oneandoneis2.com>

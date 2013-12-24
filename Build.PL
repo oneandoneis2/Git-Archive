@@ -17,7 +17,7 @@ my %module_build_args = (
     "Dominic Humphries <dominic\@oneandoneis2.com>"
   ],
   "dist_name" => "Git-Archive",
-  "dist_version" => "0.07",
+  "dist_version" => "0.08",
   "license" => "perl",
   "module_name" => "Git::Archive",
   "recommends" => {},

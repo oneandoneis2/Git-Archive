@@ -1,6 +1,8 @@
 Revision history for Git-Archive
 
 {{$NEXT}}
+
+0.08  2013-12-24 11:29:11 GMT
         - Added optional sudo parameter
 
 0.07  2013-12-23 12:39:35 GMT
