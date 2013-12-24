@@ -1,6 +1,7 @@
 Revision history for Git-Archive
 
 {{$NEXT}}
+        - Added optional sudo parameter
 
 0.07  2013-12-23 12:39:35 GMT
         - Accept multiple filenames in a single string, space-separated, after all

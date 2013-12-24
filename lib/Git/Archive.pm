@@ -81,7 +81,11 @@ sub _get_repo {
         return;
         }
     my $repo;
-    eval { $repo = Git::Repository->new( work_tree => $args->{git_dir} ); };
+    my $options = {};
+    if ( my $sudo = $args->{sudo} ) {
+        $options = { git => [ 'sudo', '-u', $args->{sudo}, 'git' ] };
+        }
+    eval { $repo = Git::Repository->new( work_tree => $args->{git_dir}, $options ); };
     unless ($@) {
         return $repo;
         }
@@ -279,6 +283,10 @@ If you want to use a directory other than the current one as your repo, specify 
 
 Note: If your git-controlled dir is ./foo and you want to commit the file ./foo/bar/baz
 then ( git_dir => './foo', files => 'bar/baz' )
+
+=head3 sudo
+
+If you want to call git as a different user via sudo, specify that user here
 
 =head1 AUTHOR
 
