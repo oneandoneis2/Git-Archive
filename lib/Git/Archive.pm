@@ -2,7 +2,7 @@ package Git::Archive;
 
 use strict;
 use v5.10.0;
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 use IPC::Cmd qw/can_run/;
 
 use Git::Repository;

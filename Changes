@@ -1,6 +1,8 @@
 Revision history for Git-Archive
 
 {{$NEXT}}
+
+0.09  2014-01-02 11:34:29 GMT
         - Set git user name & email if not already done
 
 0.08  2013-12-24 11:29:11 GMT
