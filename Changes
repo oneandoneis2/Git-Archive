@@ -1,6 +1,7 @@
 Revision history for Git-Archive
 
 {{$NEXT}}
+        - Set git user name & email if not already done
 
 0.08  2013-12-24 11:29:11 GMT
         - Added optional sudo parameter

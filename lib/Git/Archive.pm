@@ -42,6 +42,14 @@ sub commit {
         return $error->( $args,'Repo already has staged files');
         }
 
+    ## Populate name & email if not already done
+    unless ( $repo->run( 'config', 'user.email' ) ) {
+        system( $repo->run( 'config', 'user.email', '"git.user@example.com"' ) );
+        }
+    unless ( $repo->run( 'config', 'user.name' ) ) {
+        system( $repo->run( 'config', 'user.name', '"Automated Commit"' ) );
+        }
+
     # Looks like we're good to go. Let's commit!
     my $files = $self->_commit( $args, $repo ) || [];
     unless ( @{$files} ) {
