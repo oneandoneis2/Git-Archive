@@ -25,6 +25,14 @@ Git::Repository->run( clone => $rd, $ld );
 ok(-e "$ld/.git", 'Successful git clone');
 my $repo = Git::Repository->new( work_tree => $ld );
 
+## Populate name & email if not already done
+unless ( $repo->run( 'config', 'user.email' ) ) {
+    system( $repo->run( 'config', 'user.email', '"git.user@example.com"' ) );
+    }
+unless ( $repo->run( 'config', 'user.name' ) ) {
+    system( $repo->run( 'config', 'user.name', '"Automated Commit"' ) );
+    }
+
 # Right.. initial commit time
 {
     open(my $foo, '>', "$ld/foo");
